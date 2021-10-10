@@ -1,0 +1,20 @@
+@use '../abstracts/mixins' as m;
+@use '../abstracts/private-variubles' as v;
+@use './header/header';
+@use './day-grid/day-grid';
+
+.CDP-body {
+  @include m.flex-layout(column, center, center);
+  @include m.container(v.$body-width, auto, v.$main-background-color);
+  @include m.shadow-bottom-right(v.$shadow-depth);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: v.$body-width;
+  border-radius: v.$add-radius;
+  padding: v.$body-padding;
+  font-family: v.$main-font;
+  font-size: v.$default-font-size;
+  color: v.$visual-element;
+}

@@ -1,0 +1,26 @@
+@use './functions' as f;
+
+// Basic flex-box setup
+@mixin flex-layout($direction, $align, $justify) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: $align;
+  justify-content: $justify;
+}
+
+// Basic container setup with
+@mixin container($width, $height, $bg-color) {
+  width: $width;
+  height: $height;
+  background-color: $bg-color;
+}
+
+// Bottom border radius
+@mixin border-rad-bottom($rad-size) {
+  border-radius: 0 0 $rad-size $rad-size;
+}
+
+// Bottom right shadow
+@mixin shadow-bottom-right($intensity) {
+  box-shadow: $intensity $intensity 2px f.contrast(black, 50);
+}

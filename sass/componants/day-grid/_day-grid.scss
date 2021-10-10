@@ -1,0 +1,68 @@
+@use '../../abstracts/mixins' as m;
+@use '../../abstracts/functions' as f;
+@use '../../abstracts/private-variubles' as v;
+
+$grid-width: v.$body-width - (v.$body-padding * 2);
+$weekday-name-font-size: f.adjust-size(v.$larger-limit, v.$body-width, 0.5rem, v.$default-font-size);
+$day-font-size: f.adjust-size(v.$larger-limit, v.$body-width, 0.65rem, v.$default-font-size);
+
+.CDP-day-grid {
+  @include m.flex-layout(row, center, center);
+  flex-wrap: wrap;
+  width: $grid-width;
+  height: $grid-width;
+  font-size: $day-font-size;
+}
+
+.CDP-day-grid-cell {
+  @include m.flex-layout(column, center, center);
+  width: calc(#{$grid-width} / 7);
+  height: calc(#{$grid-width} / 7);
+  border: solid v.$divider-size transparent;
+  font-weight: 600;
+}
+
+.CDP-day-number-container {
+  @include m.flex-layout(column, center, center);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  &:hover {
+    background-color: v.$faint-highlight;
+    color: f.contrast(v.$faint-highlight, 70);
+  }
+}
+.CDP-weekday-name-container {
+  cursor: default;
+  &:hover {
+    background-color: transparent;
+    color: v.$visual-element;
+  }
+}
+
+.CDP-weekday-name {
+  font-size: $weekday-name-font-size;
+  border-bottom: solid v.$divider-size f.contrast(v.$main-background-color, 3);
+}
+.greyed-out-CDP-day {
+  font-weight: 400;
+  color: f.contrast(v.$main-background-color, 30);
+  cursor: default;
+  &:hover {
+    background-color: transparent;
+    color: f.contrast(v.$main-background-color, 30);
+  }
+}
+.CDP-Friday-weekday {
+  border-right: solid v.$divider-size f.contrast(v.$main-background-color, 3);
+}
+.selected-CDP-day {
+  background-color: v.$selected-bg-color;
+  color: f.contrast(v.$selected-bg-color, 100);
+  &:hover {
+    background-color: v.$selected-bg-color;
+    color: f.contrast(v.$selected-bg-color, 100);
+  }
+}

@@ -1,0 +1,14 @@
+@use '../../abstracts/mixins' as m;
+@use '../../abstracts/functions' as f;
+@use '../../abstracts/private-variubles' as v;
+
+.CDP-year-select {
+  @include m.flex-layout(row, center, center);
+  width: 100%;
+  font-size: v.$year-font-size;
+  margin-bottom: v.$year-margin-bottom;
+}
+
+.CDP-year-value {
+  margin: 0 v.$year-margin-sides 0 v.$year-margin-sides;
+}

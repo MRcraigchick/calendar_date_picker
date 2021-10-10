@@ -1,0 +1,33 @@
+@use '../../abstracts/functions' as f;
+@use '../../abstracts/mixins' as m;
+@use '../../abstracts/private-variubles' as v;
+
+$date-input-width: 120px;
+$date-input-height: 40px;
+$date-input-padding: 5px;
+$date-input-padding-left: 10px;
+$date-input-font-size: 1rem;
+
+.CDP-date-input-container {
+  @include m.flex-layout(row, center, center);
+  font-family: v.$main-font;
+  background-color: white;
+}
+.CDP-date-input {
+  width: $date-input-width;
+  height: $date-input-height;
+  padding: $date-input-padding $date-input-padding $date-input-padding $date-input-padding-left;
+  margin-right: 8px;
+  font-size: $date-input-font-size;
+  border: none;
+  outline: none;
+}
+.open-calendar-icon {
+  @include m.flex-layout(row, center, center);
+  padding-right: 5px;
+  fill: v.$selected-bg-color;
+  cursor: pointer;
+  &:hover {
+    fill: f.tint(v.$selected-bg-color, 20);
+  }
+}

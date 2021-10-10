@@ -1,0 +1,116 @@
+@use '../../abstracts/functions' as f;
+@use '../../abstracts/mixins' as m;
+@use '../../abstracts/private-variubles' as v;
+
+$selected-margin-bottom: calc((#{v.$displayed-month-height} - (4px + #{v.$month-border-size})) - v.$month-font-size);
+
+.CDP-month-select {
+  @include m.flex-layout(row, center, center);
+  width: 100%;
+  margin-bottom: v.$month-margin-bottom;
+}
+
+.CDP-month-dropdown {
+  @include m.flex-layout(column, flex-start, flex-start);
+  @include m.shadow-bottom-right(calc(#{v.$shadow-depth} / 4));
+  position: relative;
+  width: v.$month-select-width;
+  height: v.$displayed-month-height;
+  border: solid v.$month-border-size v.$faint-border;
+  margin: 0 v.$month-side-margins 0 v.$month-side-margins;
+  border-radius: calc(#{v.$add-radius} / 2);
+  background-color: v.$selected-bg-color;
+  color: f.contrast(v.$selected-bg-color, 90);
+  cursor: pointer;
+
+  &::after {
+    position: absolute;
+    content: '';
+    top: 45%;
+    right: 8px;
+    width: 0;
+    height: 0;
+    border: v.$triangle-size solid transparent;
+    border-color: f.contrast(v.$selected-bg-color, 90) transparent transparent transparent;
+    cursor: pointer;
+    transform-origin: top;
+    transform: rotate(0deg);
+  }
+}
+
+.CDP-month-option {
+  font-weight: 600;
+  position: relative;
+  width: calc(100% + (#{v.$month-border-size}) * 2);
+  left: -(v.$month-border-size);
+  padding: v.$month-option-padding;
+  border-right: solid v.$month-border-size v.$faint-border;
+  border-left: solid v.$month-border-size v.$faint-border;
+  cursor: pointer;
+  display: none;
+  font-size: v.$month-font-size;
+  font-weight: 500;
+  background-color: v.$selected-bg-hover;
+  @include m.shadow-bottom-right(calc(#{v.$shadow-depth} / 4));
+  &:hover {
+    background-color: v.$hover-color;
+    color: f.contrast(v.$hover-color, 90);
+  }
+}
+
+.selected-CDP-month {
+  @include m.flex-layout(column, flex-start, center);
+  position: relative;
+  top: 50%;
+  left: calc(#{v.$month-border-size} / 2);
+  transform: translate(0, -50%);
+  width: calc(100% - #{v.$month-border-size} / 2);
+  padding: 0 0 0 10px;
+  border: none;
+  color: f.contrast(v.$selected-bg-color, 90);
+  background-color: v.$selected-bg-color;
+  box-shadow: none;
+  border-radius: calc(#{v.$add-radius} / 2);
+  &:hover {
+    background-color: v.$selected-bg-color;
+    color: f.contrast(v.$selected-bg-color, 90);
+  }
+}
+
+.CDP-month-option:nth-child(13) {
+  border-bottom: solid v.$month-border-size v.$faint-border;
+  border-radius: 0 0 calc(#{v.$add-radius} / 2) calc(#{v.$add-radius} / 2);
+  &:hover {
+    border-radius: 0 0 calc((#{v.$add-radius} / 2) + 0.1px) calc((#{v.$add-radius} / 2) + 0.1px);
+  }
+}
+
+.show-CDP-month-options {
+  border-radius: calc(#{v.$add-radius} / 2) calc(#{v.$add-radius} / 2) 0 0;
+  &::after {
+    top: calc(39% + #{v.$triangle-size});
+    transform: rotate(180deg);
+  }
+  .CDP-month-option {
+    display: flex;
+    padding-left: 10px;
+    &:hover {
+      border-left: solid 3px f.contrast(v.$selected-bg-color, 70);
+    }
+  }
+  .selected-CDP-month {
+    position: relative;
+    margin-bottom: $selected-margin-bottom;
+    &:hover {
+      border-left: none;
+    }
+  }
+}
+
+// Removes any prevously declared borders, remove this code if you desire borders
+.CDP-month-option {
+  border: none;
+}
+.CDP-month-dropdown {
+  border: none;
+}

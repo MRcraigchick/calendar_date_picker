@@ -1,0 +1,33 @@
+@use '../../abstracts/mixins' as m;
+@use '../../abstracts/functions' as f;
+@use '../../abstracts/private-variubles' as v;
+
+.next-CDP-month,
+.previous-CDP-month,
+.increment-CDP-year,
+.decrement-CDP-year {
+  @include m.flex-layout(column, center, center);
+  height: v.$triangle-size + 2px;
+  width: v.$triangle-size + 2px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.CDP-triangle-left,
+.CDP-triangle-right {
+  @include m.flex-layout(column, center, center);
+  width: 0px;
+  height: 0px;
+  background-color: transparent;
+}
+
+.CDP-triangle-left {
+  border: v.$triangle-size solid transparent;
+  border-color: transparent v.$direction-btn-color transparent transparent;
+}
+.CDP-triangle-right {
+  border: v.$triangle-size solid transparent;
+  border-color: transparent transparent transparent v.$direction-btn-color;
+}

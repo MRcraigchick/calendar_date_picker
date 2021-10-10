@@ -1,0 +1,46 @@
+@use '../../abstracts/functions' as f;
+@use '../../abstracts/mixins' as m;
+@use '../../abstracts/private-variubles' as v;
+
+$close-btn-size: 20px;
+$close-btn-bar-height: 3px;
+$close-btn-hover-color: #da4c4c;
+
+.CDP-close-btn {
+  @include m.flex-layout(column, center, center);
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: $close-btn-size;
+  height: $close-btn-size;
+  cursor: pointer;
+  &:hover {
+    .CDP-close-btn-x:nth-child(1) {
+      background-color: $close-btn-hover-color;
+      transition: background-color 0.5s;
+      &::after {
+        background-color: $close-btn-hover-color;
+        transition: background-color 0.5s;
+      }
+    }
+  }
+}
+
+.CDP-close-btn-x {
+  position: relative;
+  width: $close-btn-size;
+  height: $close-btn-bar-height;
+  background-color: v.$visual-element;
+  transition: background-color 0.5s;
+  transform: rotate(45deg);
+
+  &::after {
+    position: absolute;
+    content: '';
+    width: $close-btn-size;
+    height: $close-btn-bar-height;
+    background-color: v.$visual-element;
+    transition: background-color 0.5s;
+    transform: rotate(90deg);
+  }
+}

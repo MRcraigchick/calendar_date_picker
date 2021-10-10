@@ -1,0 +1,64 @@
+@use '../abstracts/functions' as f;
+@use '../config' as conf;
+
+// ATENTION, THESE ARE DEPENDANT VARIUBLES, DO NOT CHANGE!
+
+// This provides a limit for the adjust-size() function to check against
+// so it can determine weather to use a larger size setting or smaller
+// size setting. It is used in the code to relate to the body width.
+// So if a smaller size is chosen for the body width, the sizes will be
+// adjusted to fit the smaller width size.
+
+$larger-limit: 250px;
+
+// Brings in all config variubles
+
+$body-width: conf.$body-width;
+$body-padding: conf.$body-padding;
+
+$add-radius: conf.$add-radius;
+$shadow-depth: conf.$shadow-depth;
+$main-background-color: conf.$main-background-color;
+$selected-bg-color: conf.$selected-bg-color;
+$main-font: conf.$main-font;
+$default-font-size: conf.$default-font-size;
+
+$year-margin-bottom: conf.$year-margin-bottom;
+$year-margin-sides: conf.$year-margin-sides;
+
+$month-border-size: conf.$month-border-size;
+$month-margin-bottom: conf.$month-margin-bottom;
+$month-side-margins: conf.$month-side-margins;
+$month-select-width: conf.$month-select-width;
+$month-option-padding: conf.$month-option-padding;
+
+$divider-size: conf.$divider-size;
+
+// These hold the contrasting functionality for the base colors
+
+$selected-bg-hover: f.contrast(conf.$selected-bg-color, 20);
+$visual-element: f.contrast(conf.$main-background-color, conf.$default-shade-intensity);
+$month-background-color: $visual-element;
+$faint-highlight: f.contrast(conf.$main-background-color, 20);
+$faint-border: f.contrast(conf.$main-background-color, 20);
+$hover-color: conf.$main-background-color;
+$direction-btn-color: f.contrast(conf.$main-background-color, conf.$default-shade-intensity);
+
+// These adjust the the sizes of the elements defined depending on the size of the $larger-limit variuble
+
+$triangle-size: f.adjust-size($larger-limit, conf.$body-width, 5px, 7px);
+
+$displayed-month-height: f.adjust-size(
+  $larger-limit,
+  conf.$body-width,
+  conf.$displayed-month-height-small,
+  conf.$displayed-month-height-large
+);
+
+$year-font-size: f.adjust-size($larger-limit, conf.$body-width, conf.$year-font-size-small, conf.$year-font-size-large);
+$month-font-size: f.adjust-size(
+  $larger-limit,
+  conf.$body-width,
+  conf.$month-font-size-small,
+  conf.$month-font-size-large
+);

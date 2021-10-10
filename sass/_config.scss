@@ -1,0 +1,44 @@
+// EDITABLE VARIUBLES
+
+// Body variubles
+$body-width: 250px;
+$body-padding: 15px;
+
+// All other colors in the code are defined as the contrasts of these two colors
+$main-background-color: #ffffff;
+$selected-bg-color: #006680;
+
+// The radius will be set to the body and half of the radius value to the month selector
+$add-radius: 5px;
+
+// Gets smaller when the body width is below 250px
+$default-font-size: 0.8rem;
+
+// Controls how much shade or contrast intensity will be applyed
+$default-shade-intensity: 60%;
+
+$shadow-depth: 3px;
+$main-font: Arial, Helvetica, sans-serif;
+
+// Gets smaller when the body width is below 250px
+$default-triangle-size: 7px;
+
+// Month Selector variubles
+$displayed-month-height-large: 30px;
+$displayed-month-height-small: 30px;
+$month-select-width: 100%;
+$month-option-padding: 3px;
+$month-border-size: 0px;
+$month-side-margins: 20px;
+$month-margin-bottom: 10px;
+$month-font-size-large: 1rem;
+$month-font-size-small: 0.8rem;
+
+// Year Selector variubles
+$year-margin-sides: 15px;
+$year-margin-bottom: 5px;
+$year-font-size-large: 1.4rem;
+$year-font-size-small: 1.4rem;
+
+// Day Grid variubles
+$divider-size: 2px;
