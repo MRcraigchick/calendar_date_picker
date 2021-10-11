@@ -3,12 +3,14 @@ import Cal from '../lib/CalendarDates.js';
 import { calendarXML } from '../icons/calendarXML.js';
 
 export default class DateInput {
-  constructor(initialValue = undefined) {
+  constructor(containerSelector, initialValue = undefined) {
+    this.container = document.querySelector(containerSelector);
+    this.dateToday = new Date().toDateString().split(' ');
     this.initialValue = initialValue;
     this.dateInputHTMLMarkup(this.initialValue);
   }
   dateInputHTMLMarkup(value) {
-    document.querySelector(`.${CDP.classNames.mainContainer}`).innerHTML = `
+    this.container.innerHTML = `
           <div class="${CDP.classNames.dateInputContainer}">
             <input type="text" class="${CDP.classNames.dateInput}" value="${value}" />
             <div class="${CDP.classNames.openCalendarIcon}">

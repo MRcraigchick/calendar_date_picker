@@ -13,6 +13,13 @@ $larger-limit: 250px;
 
 // Brings in all config variubles
 
+$date-input-margin: conf.$date-input-margin;
+$date-input-width: conf.$date-input-width;
+$date-input-height: conf.$date-input-height;
+$date-input-padding: conf.$date-input-padding;
+$date-input-padding-left: conf.$date-input-padding-left;
+$date-input-font-size: conf.$date-input-font-size;
+
 $body-width: conf.$body-width;
 $body-padding: conf.$body-padding;
 

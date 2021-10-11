@@ -2,23 +2,18 @@
 @use '../../abstracts/mixins' as m;
 @use '../../abstracts/private-variubles' as v;
 
-$date-input-width: 120px;
-$date-input-height: 40px;
-$date-input-padding: 5px;
-$date-input-padding-left: 10px;
-$date-input-font-size: 1rem;
-
 .CDP-date-input-container {
   @include m.flex-layout(row, center, center);
   font-family: v.$main-font;
   background-color: white;
+  margin: v.$date-input-margin;
 }
 .CDP-date-input {
-  width: $date-input-width;
-  height: $date-input-height;
-  padding: $date-input-padding $date-input-padding $date-input-padding $date-input-padding-left;
+  width: v.$date-input-width;
+  height: v.$date-input-height;
+  padding: v.$date-input-padding v.$date-input-padding v.$date-input-padding v.$date-input-padding-left;
   margin-right: 8px;
-  font-size: $date-input-font-size;
+  font-size: v.$date-input-font-size;
   border: none;
   outline: none;
 }

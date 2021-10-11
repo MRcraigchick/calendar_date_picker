@@ -1,9 +1,12 @@
 import { CDP } from '../CDP-config.js';
 import cal from '../lib/CalendarDates.js';
 
-export default class CalendarDatePicker {
-  constructor(futureDatesOnly = false, maxYear = null, minYear = null) {
-    this.dateToday = new Date().toDateString().split(' ');
+export default class Calendar {
+  constructor(containerSelector, futureDatesOnly = false, maxYear = null, minYear = null, startDate = null) {
+    this.containerSelector = containerSelector;
+    this.container = document.querySelector(containerSelector);
+    this.startDate =
+      startDate !== null ? new Date(startDate).toDateString().split(' ') : new Date().toDateString().split(' ');
     this.months = cal.getMonthsList();
     this.calendar = null;
     this.yearChanger = null;
@@ -11,15 +14,17 @@ export default class CalendarDatePicker {
     this.dayGrid = null;
     this.dropdown = false;
     this.calendar = null;
-    this.minYear = futureDatesOnly ? this.dateToday[3] : minYear;
+    this.minYear = futureDatesOnly ? this.startDate[3] : minYear;
     this.maxYear = maxYear;
     this.futureDatesOnly = futureDatesOnly;
-    this.buildCalendarDatePickerHTMLMarkup();
+    this.buildCalendarHTMLMarkup();
     this.addAllEventListeners();
   }
 
-  buildCalendarDatePickerHTMLMarkup() {
-    document.querySelector(`.${CDP.classNames.mainContainer}`).innerHTML = `
+  bindThisToEvents() {}
+
+  buildCalendarHTMLMarkup() {
+    this.container.innerHTML += `
       <div class="${CDP.classNames.body}">
         <div class="${CDP.classNames.closeBtn}">
           <div class="${CDP.classNames.closeBtnX}"></div>
@@ -39,112 +44,150 @@ export default class CalendarDatePicker {
         <div class="${CDP.classNames.dayGrid}"></div>
       </div>
   `;
-    this.yearChanger = document.querySelector(`.${CDP.classNames.yearValue}`);
-    this.monthSelect = document.querySelector(`.${CDP.classNames.monthDropdown}`);
-    this.dayGrid = document.querySelector(`.${CDP.classNames.dayGrid}`);
+    this.yearChanger = this.container.querySelector(`.${CDP.classNames.yearValue}`);
+    this.monthSelect = this.container.querySelector(`.${CDP.classNames.monthDropdown}`);
+    this.dayGrid = this.container.querySelector(`.${CDP.classNames.dayGrid}`);
     this.loadCalendarInterface();
   }
 
   addAllEventListeners() {
-    window.addEventListener('load', () => {
-      if (this.futureDatesOnly && this.selectedYearIsYearNow()) {
-        this.addRemainingMonthsToDropdown(this.getMonthNameFromShortName(this.dateToday[1]));
-      } else {
-        this.addMonthsToDropdown(this.getMonthNameFromShortName(this.dateToday[1]));
-      }
-      this.setYearNow();
-      this.updateCalendar();
-      this.selectTodaysDay();
-    });
-
-    this.yearChanger.parentNode.addEventListener('click', (e) => {
-      if (
-        e.target.classList[0] === CDP.classNames.decrementYear ||
-        e.target.parentNode.classList[0] === CDP.classNames.decrementYear
-      ) {
-        this.changeYear('decrement');
-        this.addClassToFirstDay();
-      } else if (
-        e.target.classList[0] === CDP.classNames.incrementYear ||
-        e.target.parentNode.classList[0] === CDP.classNames.incrementYear
-      ) {
-        this.changeYear('increment');
-        this.addClassToFirstDay();
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (
-        e.target.classList[0] === CDP.classNames.monthDropdown ||
-        e.target.classList[0] === CDP.classNames.monthOption
-      ) {
-        this.dropdownSwitch();
-      } else {
-        this.dropdownSwitch(true);
-      }
-    });
-
-    this.monthSelect.addEventListener('click', (e) => {
-      if (e.target.classList[1] === undefined && e.target.classList[0] === CDP.classNames.monthOption) {
-        if (this.futureDatesOnly && this.selectedYearIsYearNow()) {
-          this.addRemainingMonthsToDropdown(e.target.innerHTML);
-        } else {
-          this.addMonthsToDropdown(e.target.innerHTML);
-        }
-        this.updateCalendar();
-        this.addClassToFirstDay();
-      }
-    });
-
-    this.monthSelect.parentNode.addEventListener('click', (e) => {
-      if (
-        e.target.classList[0] === CDP.classNames.previousMonth ||
-        e.target.parentNode.classList[0] === CDP.classNames.previousMonth
-      ) {
-        this.changeMonth('decrement');
-        this.addClassToFirstDay();
-      } else if (
-        e.target.classList[0] === CDP.classNames.nextMonth ||
-        e.target.parentNode.classList[0] === CDP.classNames.nextMonth
-      ) {
-        this.changeMonth('increment');
-        this.addClassToFirstDay();
-      }
-    });
-
-    this.dayGrid.addEventListener('click', (e) => {
-      this.addRemoveClassToSelectedDay(e);
-    });
+    this.container.addEventListener('click', this.incrementDecrementYearClickEvent.bind(this));
+    this.container.addEventListener('click', this.toggleDropdownEvent.bind(this));
+    this.container.addEventListener('click', this.monthClickHandler.bind(this));
+    this.container.addEventListener('click', this.incrementDecrementMonthClickEvent.bind(this));
+    this.container.addEventListener('click', this.addRemoveClassToSelectedDay.bind(this));
   }
 
   loadCalendarInterface() {
     if (this.futureDatesOnly) {
-      this.addRemainingMonthsToDropdown(this.getMonthNameFromShortName(this.dateToday[1]));
+      this.addRemainingMonthsToDropdown(this.getMonthNameFromShortName(this.startDate[1]));
     } else {
-      this.addMonthsToDropdown(this.getMonthNameFromShortName(this.dateToday[1]));
+      this.addMonthsToDropdown(this.getMonthNameFromShortName(this.startDate[1]));
     }
     this.setYearNow();
     this.updateCalendar();
     this.selectTodaysDay();
   }
 
+  incrementDecrementYearClickEvent(e) {
+    if (
+      e.target.classList[0] === CDP.classNames.decrementYear ||
+      e.target.parentNode.classList[0] === CDP.classNames.decrementYear
+    ) {
+      this.changeYear('decrement');
+      this.addClassToFirstDay();
+    } else if (
+      e.target.classList[0] === CDP.classNames.incrementYear ||
+      e.target.parentNode.classList[0] === CDP.classNames.incrementYear
+    ) {
+      this.changeYear('increment');
+      this.addClassToFirstDay();
+    }
+  }
+
+  toggleDropdownEvent(e) {
+    if (
+      e.target.classList[0] === CDP.classNames.monthDropdown ||
+      e.target.classList[0] === CDP.classNames.monthOption
+    ) {
+      console.log(e.target);
+      this.dropdownSwitch();
+    } else {
+      this.dropdownSwitch(true);
+    }
+  }
+
+  // A toggle switch that opens or closes the dropdown menu for selecting a month of the year
+
+  dropdownSwitch(isOutside = false) {
+    if (!this.dropdown) {
+      this.dropdown = true;
+    } else {
+      this.dropdown = false;
+    }
+    if (isOutside) {
+      this.dropdown = false;
+    }
+    if (this.dropdown) {
+      this.monthSelect.classList.add(CDP.classNames.showMonthOptions);
+    } else {
+      this.monthSelect.classList.remove(CDP.classNames.showMonthOptions);
+    }
+  }
+
+  monthClickHandler(e) {
+    if (e.target.classList[1] === undefined && e.target.classList[0] === CDP.classNames.monthOption) {
+      if (this.futureDatesOnly && this.selectedYearIsYearNow()) {
+        this.addRemainingMonthsToDropdown(e.target.innerHTML);
+      } else {
+        this.addMonthsToDropdown(e.target.innerHTML);
+      }
+      this.updateCalendar();
+      this.addClassToFirstDay();
+    }
+  }
+
+  incrementDecrementMonthClickEvent(e) {
+    {
+      try {
+        if (
+          e.target.classList[0] === CDP.classNames.previousMonth ||
+          e.target.parentNode.classList[0] === CDP.classNames.previousMonth
+        ) {
+          this.changeMonth('decrement');
+          this.addClassToFirstDay();
+        } else if (
+          e.target.classList[0] === CDP.classNames.nextMonth ||
+          e.target.parentNode.classList[0] === CDP.classNames.nextMonth
+        ) {
+          this.changeMonth('increment');
+          this.addClassToFirstDay();
+        }
+      } catch {
+        null;
+      }
+    }
+  }
+
+  // Adds or removes a class name set in the "CDP.classNames.selectedDay" value to or from the clicked day
+
+  addRemoveClassToSelectedDay(e) {
+    if (e.target.classList[0] === CDP.classNames.dayNumberContainer && e.target.classList[1] === undefined) {
+      this.removePreviousSelectedDay();
+      e.target.classList.add(CDP.classNames.selectedDay);
+    } else if (e.target.classList[0] === CDP.classNames.dayNumber && e.target.parentNode.classList[1] === undefined) {
+      this.removePreviousSelectedDay();
+      e.target.parentNode.classList.add(CDP.classNames.selectedDay);
+    } else if (
+      e.target.classList[0] === CDP.classNames.dayNumberContainer &&
+      e.target.classList[1] === CDP.classNames.selectedDay
+    ) {
+      e.target.classList.remove(CDP.classNames.selectedDay);
+    } else if (
+      e.target.classList[0] === CDP.classNames.dayNumber &&
+      e.target.parentNode.classList[1] === CDP.classNames.selectedDay
+    ) {
+      e.target.parentNode.classList.remove(CDP.classNames.selectedDay);
+    }
+  }
+
   // Returns the users selected year
 
   getSelectedYear() {
-    return Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+    return Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
   }
 
   // Returns the users selected month
 
   getSelectedMonth() {
-    return document.querySelector(`.${CDP.classNames.monthOption}.${CDP.classNames.selectedMonth}`).innerHTML;
+    return this.container.querySelector(`.${CDP.classNames.monthOption}.${CDP.classNames.selectedMonth}`).innerHTML;
   }
 
   // Returns the users selected day
 
   getSelectedDay() {
     return Number(
-      document.querySelector(`.${CDP.classNames.dayNumberContainer}.${CDP.classNames.selectedDay}`).childNodes[0]
+      this.container.querySelector(`.${CDP.classNames.dayNumberContainer}.${CDP.classNames.selectedDay}`).childNodes[0]
         .innerHTML
     );
   }
@@ -208,7 +251,7 @@ export default class CalendarDatePicker {
   // Displays the current year in the year selector before any user selection is made
 
   setYearNow() {
-    this.yearChanger.innerHTML += this.dateToday[3];
+    this.yearChanger.innerHTML += this.startDate[3];
   }
 
   setMonthsDropdown(newSelect) {
@@ -274,9 +317,9 @@ export default class CalendarDatePicker {
 
   compareSelectedMonthWithMonthNow() {
     let selectedMonth = this.getMonthNumberFromLongName(
-      document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+      this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
     );
-    let monthNow = this.getMonthNumberFromShortName(this.dateToday[1]);
+    let monthNow = this.getMonthNumberFromShortName(this.startDate[1]);
 
     if (selectedMonth > monthNow) {
       return true;
@@ -286,8 +329,8 @@ export default class CalendarDatePicker {
   }
 
   selectedYearIsYearNow() {
-    let selectedYear = Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
-    let yearNow = Number(this.dateToday[3]);
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+    let yearNow = Number(this.startDate[3]);
 
     if (selectedYear === yearNow) {
       return true;
@@ -297,7 +340,7 @@ export default class CalendarDatePicker {
   }
 
   selectedYearIsMaxYear() {
-    let selectedYear = Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
 
     if (selectedYear >= this.maxYear) {
       return true;
@@ -307,7 +350,7 @@ export default class CalendarDatePicker {
   }
 
   selectedYearIsMinYear() {
-    let selectedYear = Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
 
     if (selectedYear <= this.minYear) {
       return true;
@@ -326,7 +369,7 @@ export default class CalendarDatePicker {
   }
 
   getMonthsLeftInYear() {
-    let monthNow = this.getMonthNumberFromShortName(this.dateToday[1]);
+    let monthNow = this.getMonthNumberFromShortName(this.startDate[1]);
     let monthsRemaining = [];
 
     for (let month of this.months) {
@@ -373,16 +416,16 @@ export default class CalendarDatePicker {
   }
 
   yearBeforeSelectedYearIsYearNow() {
-    let selectedYear = Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
 
-    if (selectedYear - 1 === Number(this.dateToday[3])) {
+    if (selectedYear - 1 === Number(this.startDate[3])) {
       return true;
     } else {
       return false;
     }
   }
   yearAfterSelectedYearIsMaxYear() {
-    let selectedYear = Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
 
     if (selectedYear + 1 === this.maxYear) {
       return true;
@@ -397,22 +440,22 @@ export default class CalendarDatePicker {
       if (currSelectedMonth === 'January' && !this.selectedYearIsMinYear()) {
         this.addMonthsToDropdown(this.months[11].name);
         this.decrementYear();
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else {
         this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) - 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       }
     } else {
       this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) - 1].name);
-      this.buildCalendarDatePicker(
-        Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-        document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+      this.buildCalendar(
+        Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+        this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
       );
     }
   }
@@ -423,22 +466,22 @@ export default class CalendarDatePicker {
       if (currSelectedMonth === 'December' && !this.selectedYearIsMaxYear()) {
         this.addMonthsToDropdown(this.months[0].name);
         this.incrementYear();
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else {
         this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) + 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       }
     } else {
       this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) + 1].name);
-      this.buildCalendarDatePicker(
-        Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-        document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+      this.buildCalendar(
+        Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+        this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
       );
     }
   }
@@ -446,32 +489,32 @@ export default class CalendarDatePicker {
   decrementMonthOfFutureDate() {
     try {
       let currSelectedMonth = this.monthSelect.childNodes[0].innerHTML;
-      let monthNow = this.getMonthNameFromShortName(this.dateToday[1]);
+      let monthNow = this.getMonthNameFromShortName(this.startDate[1]);
 
       if (currSelectedMonth === monthNow && this.selectedYearIsYearNow()) {
         this.addRemainingMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth)].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else if (currSelectedMonth === 'January' && !this.selectedYearIsYearNow()) {
         this.addMonthsToDropdown(this.months[11].name);
         this.decrementYear();
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else if (this.selectedYearIsYearNow()) {
         this.addRemainingMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) - 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else {
         this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) - 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       }
     } catch {
@@ -484,34 +527,34 @@ export default class CalendarDatePicker {
       let currSelectedMonth = this.monthSelect.childNodes[0].innerHTML;
       if (currSelectedMonth === 'December' && this.selectedYearIsMaxYear()) {
         this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth)].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else if (currSelectedMonth === 'December' && !this.selectedYearIsMaxYear()) {
         this.addMonthsToDropdown(this.months[0].name);
         this.incrementYear();
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else if (this.selectedYearIsYearNow()) {
         this.addRemainingMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) + 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else if (this.selectedYearIsMaxYear()) {
         this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) + 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       } else {
         this.addMonthsToDropdown(this.months[this.getIndexOfMonth(currSelectedMonth) + 1].name);
-        this.buildCalendarDatePicker(
-          Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-          document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+        this.buildCalendar(
+          Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+          this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
         );
       }
     } catch {
@@ -539,24 +582,6 @@ export default class CalendarDatePicker {
     }
   }
 
-  // A toggle switch that opens or closes the dropdown menu for selecting a month of the year
-
-  dropdownSwitch(isOutside = false) {
-    if (!this.dropdown) {
-      this.dropdown = true;
-    } else {
-      this.dropdown = false;
-    }
-    if (isOutside) {
-      this.dropdown = false;
-    }
-    if (this.dropdown) {
-      this.monthSelect.classList.add(CDP.classNames.showMonthOptions);
-    } else {
-      this.monthSelect.classList.remove(CDP.classNames.showMonthOptions);
-    }
-  }
-
   // Gets selected month, copys it, then puts the copy to the top of the elements DOM array to be displayed
   // it in the month select box as the currently selected month
 
@@ -577,7 +602,7 @@ export default class CalendarDatePicker {
 
   // Builds the calendar for rendering
 
-  buildCalendarDatePicker(year, month) {
+  buildCalendar(year, month) {
     for (let m of this.months) {
       if (month === m.name) {
         month = m.name;
@@ -585,7 +610,7 @@ export default class CalendarDatePicker {
       }
     }
     this.calendar = cal.getCalendarGrid(year, month);
-    let grid = document.querySelector(`.${CDP.classNames.dayGrid}`);
+    let grid = this.container.querySelector(`.${CDP.classNames.dayGrid}`);
     grid.innerHTML = '';
     for (let row of this.calendar) {
       row.map(
@@ -599,30 +624,29 @@ export default class CalendarDatePicker {
   }
 
   updateCalendar() {
-    this.buildCalendarDatePicker(
-      Number(document.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
-      document.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
+    this.buildCalendar(
+      Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML),
+      this.container.querySelector(`.${CDP.classNames.selectedMonth}`).innerHTML
     );
   }
 
   // Greys out all days representing the previous month and proceeding month
 
   addGreyoutClassToPreviousAndNextMonthDays() {
-    let calendarGrid = document.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
+    let calendarGrid = this.container.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
     let month = this.getSelectedMonth();
     let year = this.getSelectedYear();
     if (
       this.futureDatesOnly &&
-      month === this.getMonthNameFromShortName(this.dateToday[1]) &&
-      year === Number(this.dateToday[3])
+      month === this.getMonthNameFromShortName(this.startDate[1]) &&
+      year === Number(this.startDate[3])
     ) {
       for (let i = 7; i < calendarGrid.length - 1; i++) {
         let day = Number(calendarGrid[i].childNodes[0].childNodes[0].innerHTML);
-        if (day === Number(this.dateToday[2])) {
+        if (day === Number(this.startDate[2])) {
           console.log('break');
           break;
         }
-        console.log('chips');
         calendarGrid[i].childNodes[0].classList.add(CDP.classNames.greyedOutDay);
       }
     } else {
@@ -650,7 +674,7 @@ export default class CalendarDatePicker {
   // rest of the active current month day grid cells
 
   addClassToWeekDayNames() {
-    let calendarGrid = document.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
+    let calendarGrid = this.container.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
     for (let i = 0; i <= 6; i++) {
       calendarGrid[i].classList.add(CDP.classNames.weekdayName);
       calendarGrid[i].childNodes[0].classList.add(CDP.classNames.weekdayNameContainer);
@@ -661,7 +685,7 @@ export default class CalendarDatePicker {
   // The right most border can then be styled to create a partition for the weekend days
 
   addClassToFriday() {
-    let calendarGrid = document.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
+    let calendarGrid = this.container.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
     for (let i = 0; i <= calendarGrid.length - 1; i++) {
       if (i % 7 === 0) {
         calendarGrid[i + 4].classList.add(CDP.classNames.FridayWeekday);
@@ -681,7 +705,7 @@ export default class CalendarDatePicker {
     for (let day of this.dayGrid.childNodes) {
       let d = day.childNodes[0].childNodes[0];
       if (
-        Number(d.innerHTML) === Number(this.dateToday[2]) &&
+        Number(d.innerHTML) === Number(this.startDate[2]) &&
         d.parentNode.classList[1] !== CDP.classNames.greyedOutDay
       ) {
         day.childNodes[0].classList.add(CDP.classNames.selectedDay);
@@ -703,8 +727,8 @@ export default class CalendarDatePicker {
     }
     if (
       this.futureDatesOnly &&
-      month === this.getMonthNameFromShortName(this.dateToday[1]) &&
-      year === Number(this.dateToday[3])
+      month === this.getMonthNameFromShortName(this.startDate[1]) &&
+      year === Number(this.startDate[3])
     ) {
       this.selectTodaysDay();
     } else {
@@ -727,28 +751,6 @@ export default class CalendarDatePicker {
         day.childNodes[0].classList.remove(CDP.classNames.selectedDay);
         break;
       }
-    }
-  }
-
-  // Adds or removes a class name set in the "CDP.classNames.selectedDay" value to or from the clicked day
-
-  addRemoveClassToSelectedDay(e) {
-    if (e.target.classList[0] === CDP.classNames.dayNumberContainer && e.target.classList[1] === undefined) {
-      this.removePreviousSelectedDay();
-      e.target.classList.add(CDP.classNames.selectedDay);
-    } else if (e.target.classList[0] === CDP.classNames.dayNumber && e.target.parentNode.classList[1] === undefined) {
-      this.removePreviousSelectedDay();
-      e.target.parentNode.classList.add(CDP.classNames.selectedDay);
-    } else if (
-      e.target.classList[0] === CDP.classNames.dayNumberContainer &&
-      e.target.classList[1] === CDP.classNames.selectedDay
-    ) {
-      e.target.classList.remove(CDP.classNames.selectedDay);
-    } else if (
-      e.target.classList[0] === CDP.classNames.dayNumber &&
-      e.target.parentNode.classList[1] === CDP.classNames.selectedDay
-    ) {
-      e.target.parentNode.classList.remove(CDP.classNames.selectedDay);
     }
   }
 }

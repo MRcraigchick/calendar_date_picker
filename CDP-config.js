@@ -1,18 +1,8 @@
 // Config object that can be edited to change variubles in the main build
 
-// A container must be defined in your main html file that the CDP date picker
-// is to be included in and a class name must be set to that container and registered
-// with the CDP.className.mainContainer property at the CDP-config.js file.
-
 const yearNow = Number(new Date().toDateString().split(' ')[3]);
 
 export const CDP = {
-  calConfig: {
-    futureDatesOnly: false,
-    minYear: -Infinity,
-    maxYear: Infinity,
-  },
-
   // These are all css class names that are crucial to the functionality of the CDP date picker.
 
   // If it is not necessary to change them, then do not!
@@ -24,12 +14,6 @@ export const CDP = {
   // Do not edit JavaScript code relating to the CDP date picker outside of this file
 
   classNames: {
-    // A container must be defined in your main html file that the CDP date picker
-    // is to be included in and a class name must be set to that container and registered with
-    // this mainContainer property
-
-    mainContainer: 'calendar-date-picker',
-
     dateInputContainer: 'CDP-date-input-container',
     dateInput: 'CDP-date-input',
     openCalendarIcon: 'open-calendar-icon',
