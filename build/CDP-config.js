@@ -3,6 +3,8 @@
 const yearNow = Number(new Date().toDateString().split(' ')[3]);
 
 export const CDP = {
+  disableDateInput: true,
+
   // These are all css class names that are crucial to the functionality of the CDP date picker.
 
   // If it is not necessary to change them, then do not!

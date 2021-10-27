@@ -18,8 +18,8 @@
   outline: none;
 }
 .open-calendar-icon {
-  @include m.flex-layout(row, center, center);
-  padding-right: 5px;
+  @include m.flex-layout(column, center, center);
+  padding-right: 3.5px;
   fill: v.$selected-bg-color;
   cursor: pointer;
   &:hover {

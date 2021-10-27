@@ -1,7 +1,7 @@
 import { CDP } from '../CDP-config.js';
 
-const width = 25;
-const multiplier = 1.5;
+const width = 22;
+const multiplier = 1.8;
 
 export let calendarXML = `
 <svg

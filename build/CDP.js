@@ -3,7 +3,17 @@ import Calendar from './components/Calendar.js';
 import DateInput from './components/DateInput.js';
 
 export default class CalendarDatePicker {
-  constructor(containerSelector, minYear, maxYear, startDate, futureDatesOnly = false) {
+  constructor(
+    setByCal = null,
+    containerSelector,
+    minYear,
+    maxYear,
+    startDate,
+    futureDatesOnly = false,
+    previousCDPDate = false
+  ) {
+    this.setByCal = setByCal;
+    this.previousCDPDate = previousCDPDate;
     this.startDate = startDate;
     this.containerSelector = containerSelector;
     this.container = document.querySelector(containerSelector);
@@ -13,6 +23,7 @@ export default class CalendarDatePicker {
     this.calendar = null;
     this.calendarOpen = false;
     this.firstCalendarOpen = true;
+    this.currentSelectedDate = this.startDate;
     this.addAllEventListeners();
   }
 
@@ -23,6 +34,9 @@ export default class CalendarDatePicker {
 
   buildDateInputOnLoad() {
     new DateInput(this.containerSelector, this.startDate);
+    if (this.setByCal !== null) {
+      this.setThisDateInputValueToSetCalValue();
+    }
   }
 
   toggleCalendarDatePickerEvent(e) {
@@ -31,15 +45,29 @@ export default class CalendarDatePicker {
       e.target.parentNode.classList[0] === CDP.classNames.openCalendarIcon ||
       e.target.parentNode.parentNode.parentNode.classList[0] === CDP.classNames.openCalendarIcon
     ) {
-      this.removeAndRebuildEventListeners();
-      this.rebuildCalendar();
+      this.openCalendar();
     } else if (
       e.target.classList[0] === CDP.classNames.closeBtn ||
       e.target.classList[0] === CDP.classNames.closeBtnX
     ) {
-      this.calendarOpen = false;
-      new DateInput(this.containerSelector, this.calendar.getFullSelectedDateString());
+      this.closeCalendar();
     }
+  }
+
+  setThisDateInputValueToSetCalValue() {
+    let setCalValue = document.querySelector(this.setByCal).querySelector(`.${CDP.classNames.dateInput}`).value;
+    this.currentSelectedDate = setCalValue;
+    this.container.querySelector(`.${CDP.classNames.dateInput}`).value = setCalValue;
+  }
+
+  openCalendar() {
+    this.removeAndRebuildEventListeners();
+    if (this.setByCal !== null) {
+      this.setThisDateInputValueToSetCalValue();
+    }
+    this.rebuildCalendar();
+    this.calendarOpen = true;
+    this.container.querySelector(`.${CDP.classNames.dateInput}`).value = this.calendar.getFullSelectedDateString();
   }
 
   closeCalendar() {
@@ -62,8 +90,9 @@ export default class CalendarDatePicker {
         this.futureDatesOnly,
         this.maxYear,
         this.minYear,
-        this.startDate
+        this.currentSelectedDate
       );
+
       this.calendarOpen = true;
     }
   }

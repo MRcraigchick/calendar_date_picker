@@ -6,7 +6,11 @@ export default class Calendar {
     this.containerSelector = containerSelector;
     this.container = document.querySelector(containerSelector);
     this.startDate =
-      startDate !== null ? new Date(startDate).toDateString().split(' ') : new Date().toDateString().split(' ');
+      startDate !== null
+        ? new Date((startDate = `${startDate.split('/')[1]}/${startDate.split('/')[0]}/${startDate.split('/')[2]}`))
+            .toDateString()
+            .split(' ')
+        : new Date().toDateString().split(' ');
     this.months = cal.getMonthsList();
     this.calendar = null;
     this.yearChanger = null;
@@ -17,11 +21,13 @@ export default class Calendar {
     this.minYear = futureDatesOnly ? this.startDate[3] : minYear;
     this.maxYear = maxYear;
     this.futureDatesOnly = futureDatesOnly;
+    this.monthMinLimit = false;
+    this.monthMaxLimit = false;
+    this.yearMinLimit = false;
+    this.yearMaxLimit = false;
     this.buildCalendarHTMLMarkup();
     this.addAllEventListeners();
   }
-
-  bindThisToEvents() {}
 
   buildCalendarHTMLMarkup() {
     this.container.innerHTML += `
@@ -67,6 +73,7 @@ export default class Calendar {
     this.setYearNow();
     this.updateCalendar();
     this.selectTodaysDay();
+    this.removeDirectionBtnAtLimit();
   }
 
   incrementDecrementYearClickEvent(e) {
@@ -90,7 +97,6 @@ export default class Calendar {
       e.target.classList[0] === CDP.classNames.monthDropdown ||
       e.target.classList[0] === CDP.classNames.monthOption
     ) {
-      console.log(e.target);
       this.dropdownSwitch();
     } else {
       this.dropdownSwitch(true);
@@ -122,8 +128,41 @@ export default class Calendar {
       } else {
         this.addMonthsToDropdown(e.target.innerHTML);
       }
+      this.removeDirectionBtnAtLimit();
       this.updateCalendar();
       this.addClassToFirstDay();
+    }
+  }
+
+  removeDirectionBtnAtLimit() {
+    try {
+      let month = this.getSelectedMonth();
+
+      if (
+        (month === this.getMonthsLeftInYear()[0] && this.futureDatesOnly && this.selectedYearIsMinYear()) ||
+        (month === 'January' && this.selectedYearIsMinYear())
+      ) {
+        this.container.querySelector(`.${CDP.classNames.previousMonth}`).style.display = 'none';
+      } else {
+        this.container.querySelector(`.${CDP.classNames.previousMonth}`).style = '';
+      }
+      if (month === 'December' && this.selectedYearIsMaxYear()) {
+        this.container.querySelector(`.${CDP.classNames.nextMonth}`).style.display = 'none';
+      } else {
+        this.container.querySelector(`.${CDP.classNames.nextMonth}`).style.display = '';
+      }
+      if (this.selectedYearIsMinYear()) {
+        this.container.querySelector(`.${CDP.classNames.decrementYear}`).style.display = 'none';
+      } else {
+        this.container.querySelector(`.${CDP.classNames.decrementYear}`).style = '';
+      }
+      if (this.selectedYearIsMaxYear()) {
+        this.container.querySelector(`.${CDP.classNames.incrementYear}`).style.display = 'none';
+      } else {
+        this.container.querySelector(`.${CDP.classNames.incrementYear}`).style = '';
+      }
+    } catch {
+      null;
     }
   }
 
@@ -147,6 +186,7 @@ export default class Calendar {
         null;
       }
     }
+    this.removeDirectionBtnAtLimit();
   }
 
   // Adds or removes a class name set in the "CDP.classNames.selectedDay" value to or from the clicked day
@@ -359,81 +399,6 @@ export default class Calendar {
     }
   }
 
-  getMonthNames() {
-    let monthNames = [];
-
-    for (let month of this.months) {
-      monthNames.push(month.name);
-    }
-    return monthNames;
-  }
-
-  getMonthsLeftInYear() {
-    let monthNow = this.getMonthNumberFromShortName(this.startDate[1]);
-    let monthsRemaining = [];
-
-    for (let month of this.months) {
-      if (month.pos === monthNow) {
-        for (let i = this.months.indexOf(month); i <= this.months.length - 1; i++) {
-          monthsRemaining.push(this.months[i].name);
-        }
-        break;
-      }
-    }
-    return monthsRemaining;
-  }
-
-  // Renders all months into the dropdown menu for selecting months of the year
-
-  addMonthsToDropdown(newSelect) {
-    let monthNames = this.getMonthNames();
-
-    this.monthSelect.innerHTML = '';
-    this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption} ${CDP.classNames.selectedMonth}">${newSelect}</p>`;
-
-    for (let month of monthNames) {
-      this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption}">${month}</p>`;
-    }
-  }
-
-  addRemainingMonthsToDropdown(newSelect) {
-    let remainingMonths = this.getMonthsLeftInYear();
-
-    this.monthSelect.innerHTML = '';
-    this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption} ${CDP.classNames.selectedMonth}">${newSelect}</p>`;
-
-    for (let month of remainingMonths) {
-      this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption}">${month}</p>`;
-    }
-  }
-
-  getIndexOfMonth(m) {
-    for (let month of this.months) {
-      if (month.name === m || month.shortName === m || month.pos === m) {
-        return this.months.indexOf(month);
-      }
-    }
-  }
-
-  yearBeforeSelectedYearIsYearNow() {
-    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
-
-    if (selectedYear - 1 === Number(this.startDate[3])) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-  yearAfterSelectedYearIsMaxYear() {
-    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
-
-    if (selectedYear + 1 === this.maxYear) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   decrementMonth() {
     let currSelectedMonth = this.monthSelect.childNodes[0].innerHTML;
     if (this.minYear !== null || this.minYear !== Infinity) {
@@ -582,6 +547,81 @@ export default class Calendar {
     }
   }
 
+  getMonthNames() {
+    let monthNames = [];
+
+    for (let month of this.months) {
+      monthNames.push(month.name);
+    }
+    return monthNames;
+  }
+
+  getMonthsLeftInYear() {
+    let monthNow = this.getMonthNumberFromShortName(this.startDate[1]);
+    let monthsRemaining = [];
+
+    for (let month of this.months) {
+      if (month.pos === monthNow) {
+        for (let i = this.months.indexOf(month); i <= this.months.length - 1; i++) {
+          monthsRemaining.push(this.months[i].name);
+        }
+        break;
+      }
+    }
+    return monthsRemaining;
+  }
+
+  // Renders all months into the dropdown menu for selecting months of the year
+
+  addMonthsToDropdown(newSelect) {
+    let monthNames = this.getMonthNames();
+
+    this.monthSelect.innerHTML = '';
+    this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption} ${CDP.classNames.selectedMonth}">${newSelect}</p>`;
+
+    for (let month of monthNames) {
+      this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption}">${month}</p>`;
+    }
+  }
+
+  addRemainingMonthsToDropdown(newSelect) {
+    let remainingMonths = this.getMonthsLeftInYear();
+
+    this.monthSelect.innerHTML = '';
+    this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption} ${CDP.classNames.selectedMonth}">${newSelect}</p>`;
+
+    for (let month of remainingMonths) {
+      this.monthSelect.innerHTML += `<p class="${CDP.classNames.monthOption}">${month}</p>`;
+    }
+  }
+
+  getIndexOfMonth(m) {
+    for (let month of this.months) {
+      if (month.name === m || month.shortName === m || month.pos === m) {
+        return this.months.indexOf(month);
+      }
+    }
+  }
+
+  yearBeforeSelectedYearIsYearNow() {
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+
+    if (selectedYear - 1 === Number(this.startDate[3])) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  yearAfterSelectedYearIsMaxYear() {
+    let selectedYear = Number(this.container.querySelector(`.${CDP.classNames.yearValue}`).innerHTML);
+
+    if (selectedYear + 1 === this.maxYear) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // Gets selected month, copys it, then puts the copy to the top of the elements DOM array to be displayed
   // it in the month select box as the currently selected month
 
@@ -618,7 +658,7 @@ export default class Calendar {
           (grid.innerHTML += `<div class="${CDP.classNames.gridCell}"><div class="${CDP.classNames.dayNumberContainer}"><p class="${CDP.classNames.dayNumber}">${x}</p></div></div>`)
       );
     }
-    this.addGreyoutClassToPreviousAndNextMonthDays();
+    this.addGreyoutClass();
     this.addClassToWeekDayNames();
     this.addClassToFriday();
   }
@@ -632,7 +672,7 @@ export default class Calendar {
 
   // Greys out all days representing the previous month and proceeding month
 
-  addGreyoutClassToPreviousAndNextMonthDays() {
+  addGreyoutClass() {
     let calendarGrid = this.container.querySelector(`.${CDP.classNames.dayGrid}`).childNodes;
     let month = this.getSelectedMonth();
     let year = this.getSelectedYear();
@@ -644,7 +684,6 @@ export default class Calendar {
       for (let i = 7; i < calendarGrid.length - 1; i++) {
         let day = Number(calendarGrid[i].childNodes[0].childNodes[0].innerHTML);
         if (day === Number(this.startDate[2])) {
-          console.log('break');
           break;
         }
         calendarGrid[i].childNodes[0].classList.add(CDP.classNames.greyedOutDay);
