@@ -1,9 +1,10 @@
 import { CDP } from '../CDP-config.js';
-import Cal from '../lib/CalendarDates.js';
+import CalendarDates from '../lib/CalendarDates.js';
 import { calendarXML } from '../icons/calendarXML.js';
 
-export default class DateInput {
+export default class DateInput extends CalendarDates {
   constructor(containerSelector, initialValue = undefined) {
+    super();
     this.container = document.querySelector(containerSelector);
     this.dateToday = new Date().toDateString().split(' ');
     this.initialValue = initialValue;
@@ -24,7 +25,7 @@ export default class DateInput {
   }
 
   static getMonthNumberFromShortName(sName) {
-    for (let month of Cal.getMonthsList()) {
+    for (let month of this.getMonthsList()) {
       if (month.shortName === sName) {
         return month.pos;
       }

@@ -1,8 +1,9 @@
 import { CDP } from '../CDP-config.js';
-import cal from '../lib/CalendarDates.js';
+import CalendarDates from '../lib/CalendarDates.js';
 
-export default class Calendar {
+export default class Calendar extends CalendarDates {
   constructor(containerSelector, futureDatesOnly = false, maxYear = null, minYear = null, startDate = null) {
+    super();
     this.containerSelector = containerSelector;
     this.container = document.querySelector(containerSelector);
     this.startDate =
@@ -11,7 +12,7 @@ export default class Calendar {
             .toDateString()
             .split(' ')
         : new Date().toDateString().split(' ');
-    this.months = cal.getMonthsList();
+    this.months = this.getMonthsList();
     this.calendar = null;
     this.yearChanger = null;
     this.monthSelect = null;
@@ -649,7 +650,7 @@ export default class Calendar {
         break;
       }
     }
-    this.calendar = cal.getCalendarGrid(year, month);
+    this.calendar = this.getCalendarGrid(year, month);
     let grid = this.container.querySelector(`.${CDP.classNames.dayGrid}`);
     grid.innerHTML = '';
     for (let row of this.calendar) {

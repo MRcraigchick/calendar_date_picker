@@ -34,7 +34,7 @@ export default class CalenderDate {
   // Takes in a year as a string or number and splits it into an array of [number, suffix] if suffix excists
   // and in the formats BC, CE or BCE.
   // If not an Error will be raised
-  static splitYearSuffix(fullYear) {
+  splitYearSuffix(fullYear) {
     let year = String(fullYear).split('');
     let suffix = [year[year.length - 3], year[year.length - 2], year[year.length - 1]].join('');
     if (suffix !== 'BCE') {
@@ -61,7 +61,7 @@ export default class CalenderDate {
   // Takes in a year as a string or number and splits it into an array of [prefix, number] if prefix excists
   // and in the format AD.
   // If not an Error will be raised
-  static splitPrefixYear(fullYear) {
+  splitPrefixYear(fullYear) {
     let year = String(fullYear).split('');
     let prefix = [year[0], year[1]].join('');
 
@@ -84,7 +84,7 @@ export default class CalenderDate {
   }
 
   // Checks if a given year has a suffix of BC, BCE or CE
-  static hasSuffix(fullyear) {
+  hasSuffix(fullyear) {
     try {
       this.splitYearSuffix(fullyear);
       return true;
@@ -94,7 +94,7 @@ export default class CalenderDate {
   }
 
   // Checks if a given year has a prefix of AD
-  static hasPrefix(fullyear) {
+  hasPrefix(fullyear) {
     try {
       this.splitPrefixYear(fullyear);
       return true;
@@ -106,7 +106,7 @@ export default class CalenderDate {
   // Takes in a year as a string or number and validates it, then returns a
   // split version of that year with each digit at a seperate index but with prefix or suffix
   // as a single string at it's own index in the array.
-  static validateAndSplitYear(fullYear) {
+  validateAndSplitYear(fullYear) {
     let year = String(fullYear).split('');
 
     if (year.length === 0) {
@@ -132,7 +132,7 @@ export default class CalenderDate {
   // If validation fails an Error will be raised.
   // If passed then the short name of the month will be returned unless the returnNumber argument is true
   // then the number representing the month will be returned
-  static validateMonth(month, returnNumber = false) {
+  validateMonth(month, returnNumber = false) {
     month = String(month);
     if (month.length > 2) {
       for (let m of months) {
@@ -155,7 +155,7 @@ export default class CalenderDate {
   // to see if the day number is within range
   // If not an Error will be thrown
   // max is defaulted at 31
-  static validateDay(day, max = 31) {
+  validateDay(day, max = 31) {
     day = Number(day);
 
     if (day === NaN) {
@@ -179,7 +179,7 @@ export default class CalenderDate {
   // If validation passed then the date will be returned as requested
   // As an array, a string or as a date object
 
-  static processDateString(date, returnString = false, returnObj = false) {
+  processDateString(date, returnString = false, returnObj = false) {
     let d = String(date).split('');
 
     if (d.includes('/')) {
@@ -234,7 +234,7 @@ export default class CalenderDate {
     }
   }
 
-  static returnCentury(fullYear) {
+  returnCentury(fullYear) {
     if (fullYear == 0) {
       return 0;
     }
@@ -280,7 +280,7 @@ export default class CalenderDate {
     throw new Error("Couldn't extract century from year");
   }
 
-  static getGregorianCenturyCode(fullYear) {
+  getGregorianCenturyCode(fullYear) {
     let century = this.returnCentury(fullYear);
     let code = null;
     if (century >= 0) {
@@ -299,7 +299,7 @@ export default class CalenderDate {
     }
   }
 
-  static getJulianCenturyCode(fullYear) {
+  getJulianCenturyCode(fullYear) {
     let century = this.returnCentury(fullYear) / 100;
 
     if (century >= 0) {
@@ -312,7 +312,7 @@ export default class CalenderDate {
     }
   }
 
-  static getYearCode(fullYear) {
+  getYearCode(fullYear) {
     let year = this.validateAndSplitYear(fullYear);
 
     if (this.hasPrefix(fullYear)) {
@@ -327,7 +327,7 @@ export default class CalenderDate {
     return (yy + Math.floor(yy / 4)) % 7;
   }
 
-  static getMonthCode(numberOrName) {
+  getMonthCode(numberOrName) {
     for (let month of months) {
       if (month.name === numberOrName || month.pos === numberOrName) {
         return month.code;
@@ -336,7 +336,7 @@ export default class CalenderDate {
     throw Error('Argument must be a month name or its corresponding number');
   }
 
-  static matchWeekDayCode(modulusSevenRemainder) {
+  matchWeekDayCode(modulusSevenRemainder) {
     if (modulusSevenRemainder === -1) {
       modulusSevenRemainder = 6;
     }
@@ -348,23 +348,32 @@ export default class CalenderDate {
     throw Error('Argument must be the result of a modulus 7 calculation on a date resulting in a number from 0 to 6 ');
   }
 
-  static isLeapYear(fullYear) {
+  isLeapYear(fullYear) {
     let year = Number(this.validateAndSplitYear(fullYear).join(''));
     return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
   }
 
-  static getDayOfTheWeek(date, GregorianDate = true) {
+  getLeapYearCode(dateArray) {
+    if (this.isLeapYear(dateArray[0])) {
+      if (dateArray[1] === 1 || dateArray[1] === 2) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  getDayOfTheWeek(date, GregorianDate = true) {
     date = this.processDateString(date);
     let centuryCode = GregorianDate ? this.getGregorianCenturyCode(date[0]) : this.getJulianCenturyCode(date[0]);
     let yearCode = this.getYearCode(date[0]);
-    let leapDay = this.isLeapYear(date[0]) ? 1 : 0;
+    let leapYearCode = this.getLeapYearCode(date);
     let monthCode = this.getMonthCode(date[1]);
     let dayNumber = date[2];
-    let dayCode = (((centuryCode + yearCode + monthCode + dayNumber) % 7) % 7) - leapDay;
+    let dayCode = (((centuryCode + yearCode + monthCode + dayNumber) % 7) % 7) - leapYearCode;
     return this.matchWeekDayCode(dayCode);
   }
 
-  static getMonthWeekDays(fullYear, month) {
+  getMonthWeekDays(fullYear, month) {
     let year = this.validateAndSplitYear(fullYear).join('');
     month = this.validateMonth(month, true);
     let dateObj = [];
@@ -397,7 +406,7 @@ export default class CalenderDate {
     }
     return dateObj;
   }
-  static getFullCalendarYear(fullYear) {
+  getFullCalendarYear(fullYear) {
     let year = this.validateAndSplitYear(fullYear).join('');
     let calendarObj = [];
     if (this.isLeapYear(year)) {
@@ -431,7 +440,7 @@ export default class CalenderDate {
     return calendarObj;
   }
 
-  static getCalendarGrid(fullYear, month) {
+  getCalendarGrid(fullYear, month) {
     let grid = [['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']];
     while (grid.length < 7) {
       grid.push(['', '', '', '', '', '', '']);
@@ -522,7 +531,7 @@ export default class CalenderDate {
     return grid;
   }
 
-  static getPositionInCalendarGrid(calendar, item) {
+  getPositionInCalendarGrid(calendar, item) {
     for (let row of calendar) {
       for (let pos of row) {
         if (pos === item) {
@@ -534,7 +543,7 @@ export default class CalenderDate {
       }
     }
   }
-  static getMonthsList() {
+  getMonthsList() {
     return months;
   }
 }

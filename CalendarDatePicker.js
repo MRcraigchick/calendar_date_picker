@@ -30,6 +30,8 @@ export default () => {
 //                           The referenced CDP on which this CDP is to get its value from must be rendered before a
 //                           value can be obtained.
 //                           Order of rendering is important!
+//
+// NOTE: There can be only one calendar depending on another. But you can have as many independent pairs as you like on a webpage.
 
 class CDPcontext {
   constructor() {
